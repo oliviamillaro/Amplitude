@@ -15,17 +15,18 @@ dotenv.load_dotenv()
 #Making the timestamp to use later for file name, changing it to a string
 timestamp = datetime.now().strftime('%Y-%m-%d %H-%M-%S')
 
-data_dir = 'raw_data'
+data_dir = 'raw_zips'
 os.makedirs(data_dir,exist_ok=True)
 filename = f'{data_dir}/{timestamp}.zip'
 
 api_key=os.getenv('AMP_API_KEY')
 secret_key=os.getenv('AMP_SECRET_KEY')
 
+#Parameter set to extract 1 full day of data
 url='https://analytics.eu.amplitude.com/api/2/export'
 params = {
-    'start': '20261012T13',
-    'end': '20261012T14'
+    'start': '20261012T00',
+    'end': '20261012T23'
 }
 
 #Setting up variables for attempts while loop
@@ -39,6 +40,24 @@ while attempts <= max_attempts:
 
         if status_code == 200:
             print(f"Code 200: successful. Attempt {attempts} worked.")
+            
+            data = response.content
+            with open(filename, 'wb') as file:
+                file.write(data)
+            print(f'File {filename} saved successfully :)')
+
+            #temp file made so i can see the unzipping is working instead of temp directory for now
+            temp_dir = 'temptemp'
+            os.makedirs(temp_dir, exist_ok=True)
+
+            # 3. Unzip the downloaded file into temptemp
+            with zipfile.ZipFile(filename, 'r') as zip_ref:
+                zip_ref.extractall(temp_dir)
+
+            # 4. getting the randomly named folder inside temptemp
+            contents = os.listdir(temp_dir)
+            print(f"Unzipped contents: {contents} inside temp file")
+
             break
 
         elif status_code == 429 or status_code >= 500:
@@ -59,28 +78,3 @@ while attempts <= max_attempts:
         else:
             print(f"Error {status_code}: {response.text}")
             break
-
-
-"""while attempts <= max_attempts:
-    response = requests.get(url, params=params, auth=(api_key, secret_key))
-    status_code = response.status_code
-
-    if response.status_code == 200:
-        data = response.content
-        with open(filename, 'wb') as file:
-            file.write(data)
-        print(f'File {filename} saved successfully :)')
-
-# Creating a temporary directory
-#temp_dir = tempfile.mkdtemp()
-
-temp_dir = 'temptemp'
-os.makedirs(temp_dir,exist_ok=True)
-
-# opening the zip file, 'r' = read mode, extracting what is in it to a temp directory
-with zipfile.ZipFile(filename, 'r') as zip_ref:
-    zip_ref.extractall(temp_dir)
-
-#this gets the random filename that is saved within the zip which then contains .json.gz
-contents = os.listdir(temp_dir)
-print(contents)"""
