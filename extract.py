@@ -12,9 +12,9 @@ dotenv.load_dotenv()
 #Making the timestamp to use later for file name, changing it to a string
 timestamp = datetime.now().strftime('%Y-%m-%d %H-%M-%S')
 
-data_dir = 'data'
+data_dir = 'raw_data'
 os.makedirs(data_dir,exist_ok=True)
-filename = f'{data_dir}/{timestamp}.json'
+filename = f'{data_dir}/{timestamp}.zip'
 
 api_key=os.getenv('AMP_API_KEY')
 secret_key=os.getenv('AMP_SECRET_KEY')
@@ -29,7 +29,10 @@ response = requests.get(url, params=params, auth=(api_key, secret_key))
 
 if response.status_code == 200:
     data = response.content
-    print('200 code')
+    with open(filename, 'wb') as file:
+        file.write(data)
+    print(f'File {filename} saved successfully :)')
+
     #with open(filename,'w') as file:
               #  json.dump(data, file)
   ##  print(f'File {filename} saved successfully :)')
