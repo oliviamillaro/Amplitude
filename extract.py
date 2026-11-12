@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 import time
 import logging
+import gzip
 import requests
 import dotenv
 
