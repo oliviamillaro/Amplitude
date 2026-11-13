@@ -64,9 +64,8 @@ while attempts <= max_attempts:
             print(f'File {filename} saved successfully :)')
             logger.info(f'File {filename} saved successfully')
 
-            #temp file made so i can see the unzipping is working instead of temp directory for now
-            temp_dir = 'temptemp'
-            os.makedirs(temp_dir, exist_ok=True)
+            #temp directory creation
+            temp_dir = tempfile.mkdtemp()
             print(f"Unzipped outer box into {temp_dir}")
             logger.info(f"Unzipped outer box into {temp_dir}")
 
@@ -99,9 +98,10 @@ while attempts <= max_attempts:
                         print(f"Extracted JSON: {json_filename}")
                         logger.info(f"Extracted JSON: {json_filename}")
 
-            # Cleanup
-            # (Commented out for now so you can physically open temptemp and look at it!)
-            # shutil.rmtree(temp_dir)
+            # Cleanup: Delete the true temporary directory and its contents
+            shutil.rmtree(temp_dir) 
+            print("Temporary workspace cleaned up.")
+            logger.info("Temporary workspace cleaned up.")
 
             break
 
