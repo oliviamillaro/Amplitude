@@ -1,6 +1,6 @@
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 import logging
 import zipfile
@@ -12,13 +12,22 @@ import dotenv
 
 dotenv.load_dotenv()
 
-#Making the timestamp to use later for file name, changing it to a string
-timestamp = datetime.now().strftime('%Y-%m-%d %H-%M-%S')
+# 1. Calculate yesterday's date for the API parameters
+yesterday = datetime.now() - timedelta(days=1)
+start_param = yesterday.strftime('%Y%m%dT00')
+end_param = yesterday.strftime('%Y%m%dT23')
 
-#setting up logs directory
+# 2. Create strings for BOTH what the data represents AND when it was extracted
+data_date = yesterday.strftime('%Y-%m-%d')
+extraction_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+
+# 3. Combine them into one super-descriptive label!
+file_label = f"data_{data_date}_extracted_{extraction_time}"
+
+# 4. Set up logs directory using the new label
 log_dir = 'logs'
 os.makedirs(log_dir, exist_ok=True)
-log_filename = f'{log_dir}/{timestamp}.log'
+log_filename = f'{log_dir}/{file_label}.log'
 
 #configuring logs
 logging.basicConfig(
@@ -33,16 +42,16 @@ logger.info('Logger successfully initialised.')
 
 data_dir = 'raw_zips'
 os.makedirs(data_dir,exist_ok=True)
-filename = f'{data_dir}/{timestamp}.zip'
+filename = f'{data_dir}/{file_label}.zip'
 
 api_key=os.getenv('AMP_API_KEY')
 secret_key=os.getenv('AMP_SECRET_KEY')
 
-#Parameter set to extract 1 full day of data
+#Parameter set to extract 1 full day of data, yesterday
 url='https://analytics.eu.amplitude.com/api/2/export'
 params = {
-    'start': '20261012T00',
-    'end': '20261012T23'
+    'start': start_param,
+    'end': end_param
 }
 
 #Setting up variables for attempts while loop
