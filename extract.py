@@ -67,15 +67,41 @@ while attempts <= max_attempts:
             #temp file made so i can see the unzipping is working instead of temp directory for now
             temp_dir = 'temptemp'
             os.makedirs(temp_dir, exist_ok=True)
+            print(f"Unzipped outer box into {temp_dir}")
+            logger.info(f"Unzipped outer box into {temp_dir}")
+
+            # Create local output directory for the final JSONs
+            json_dir = "raw_json"
+            os.makedirs(json_dir, exist_ok=True)
 
             #unzip the downloaded file into temptemp
             with zipfile.ZipFile(filename, 'r') as zip_ref:
                 zip_ref.extractall(temp_dir)
 
-            #getting the randomly named folder inside temptemp
-            contents = os.listdir(temp_dir)
-            print(f"Unzipped contents: {contents} inside temp file")
-            logger.info(f"Unzipped contents: {contents}")
+           # Locate Target Folder safely (ignoring hidden files)
+            day_folder = next(f for f in os.listdir(temp_dir) if f.isdigit())
+            day_path = os.path.join(temp_dir, day_folder)
+
+            # Directory Walking and Second Level Extraction
+            for root, _, files in os.walk(day_path):
+                for current_file in files:
+                    if current_file.endswith('.gz'):
+                    
+                        # Build the file paths
+                        gz_path = os.path.join(root, current_file)
+                        json_filename = current_file[:-3]  # Slices off the last 3 characters (".gz")
+                        output_path = os.path.join(json_dir, json_filename)
+                        
+                        # Unpack the .gz to .json
+                        with gzip.open(gz_path, 'rb') as gz_file, open(output_path, 'wb') as out_file:
+                            shutil.copyfileobj(gz_file, out_file)
+                            
+                        print(f"Extracted JSON: {json_filename}")
+                        logger.info(f"Extracted JSON: {json_filename}")
+
+            # Cleanup
+            # (Commented out for now so you can physically open temptemp and look at it!)
+            # shutil.rmtree(temp_dir)
 
             break
 

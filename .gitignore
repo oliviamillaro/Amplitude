@@ -1,5 +1,7 @@
 raw_zips/
 temptemp/
+logs/
+raw_json/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
