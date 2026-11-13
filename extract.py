@@ -12,17 +12,17 @@ import dotenv
 
 dotenv.load_dotenv()
 
-# 1. Calculate yesterday's date for the API parameters
+# getting yesterday's date for the API parameters
 yesterday = datetime.now() - timedelta(days=1)
 start_param = yesterday.strftime('%Y%m%dT00')
 end_param = yesterday.strftime('%Y%m%dT23')
 
-# 2. Create strings for both what the data represents and when it was extracted
+# create strings for both what the data represents (yesterday's data) and when it was extracted (when the script actually ran)
 data_date = yesterday.strftime('%Y-%m-%d')
 extraction_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 file_label = f"data_{data_date}_extracted_{extraction_time}"
 
-# 4. Set up logs directory, configuring, putting info into logger, printing success
+# set up logs directory, configuring, putting info into logger, printing success
 log_dir = 'logs'
 os.makedirs(log_dir, exist_ok=True)
 log_filename = f'{log_dir}/{file_label}.log'
@@ -36,7 +36,7 @@ logging.basicConfig(
 logger = logging.getLogger()
 logger.info('Logger successfully initialised.')
 
-# Set up directory for the raw downloaded zip files
+# set up directory for the raw downloaded zip files
 data_dir = 'raw_zips'
 os.makedirs(data_dir,exist_ok=True)
 filename = f'{data_dir}/{file_label}.zip'
@@ -52,7 +52,7 @@ params = {
     'end': end_param
 }
 
-#Setting up variables for attempts while loop and sleep time
+# setting up variables for attempts while loop and sleep time
 attempts = 1
 max_attempts = 3
 sleep_time = 30
@@ -73,12 +73,12 @@ while attempts <= max_attempts:
             print(f'File {filename} saved successfully :)')
             logger.info(f'File {filename} saved successfully')
 
-            #temp directory creation for unzipping
+            # temp directory creation for unzipping
             temp_dir = tempfile.mkdtemp()
             print(f"Unzipped outer box into {temp_dir}")
             logger.info(f"Unzipped outer box into {temp_dir}")
 
-            # Create local output directory for the final JSONs
+            # create local output directory for the final JSONs
             json_dir = "raw_json"
             os.makedirs(json_dir, exist_ok=True)
 
@@ -86,28 +86,28 @@ while attempts <= max_attempts:
             with zipfile.ZipFile(filename, 'r') as zip_ref:
                 zip_ref.extractall(temp_dir)
 
-            # Locate amplitude's randomly numbered inner folder
+            # locate amplitude's randomly numbered inner folder
             day_folder = next(f for f in os.listdir(temp_dir) if f.isdigit())
             day_path = os.path.join(temp_dir, day_folder)
 
-            # Loop through the folder, find .gz files and convert to .json
+            # loop through the folder, find .gz files and convert to .json
             for root, _, files in os.walk(day_path):
                 for current_file in files:
                     if current_file.endswith('.gz'):
                     
-                        # Build the file paths for reading/writing
+                        # build the file paths for reading/writing
                         gz_path = os.path.join(root, current_file)
-                        json_filename = current_file[:-3]  # Slices off the last 3 characters (".gz")
+                        json_filename = current_file[:-3]
                         output_path = os.path.join(json_dir, json_filename)
                         
-                        # Unpack the binary .gz to standard .json
+                        # unpack the binary .gz to standard .json
                         with gzip.open(gz_path, 'rb') as gz_file, open(output_path, 'wb') as out_file:
                             shutil.copyfileobj(gz_file, out_file)
                             
                         print(f"Extracted JSON: {json_filename}")
                         logger.info(f"Extracted JSON: {json_filename}")
 
-            # cleanup - removing temporary directory and leftover compressed files
+            # cleanup - removing temporary directory and leftover compressed files. leaves the raw zips, and the final JSONs
             shutil.rmtree(temp_dir) 
             print("Temporary workspace cleaned up.")
             logger.info("Temporary workspace cleaned up.")
