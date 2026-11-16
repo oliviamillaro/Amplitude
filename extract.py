@@ -47,10 +47,12 @@ filename = f'{data_dir}/{file_label}.zip'
 api_key=os.getenv('AMP_API_KEY')
 secret_key=os.getenv('AMP_SECRET_KEY')
 
+#loading AWS keys for existing data checks
 AWS_ACCESS_KEY=os.getenv('AWS_ACCESS_KEY')
 AWS_SECRET_ACCESS_KEY=os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_BUCKET_NAME=os.getenv('AWS_BUCKET_NAME')
 
+#initialising s3 client using AWS credentials
 logger.info("Checking S3 for existing data...")
 try:
     s3_client = boto3.client(
@@ -58,12 +60,16 @@ try:
         aws_access_key_id=AWS_ACCESS_KEY,
         aws_secret_access_key=AWS_SECRET_ACCESS_KEY
     )
-    
+
+    #assumes data is missing as baseline and then checks
     data_already_exists = False
+    #list of objects currently sitting in the bucket
     s3_response = s3_client.list_objects_v2(Bucket=AWS_BUCKET_NAME)
     
     if 'Contents' in s3_response:
+        #loops through every file currently in the bucket
         for obj in s3_response['Contents']:
+            #for each file checks whether the data_date is in the filename
             if data_date in obj['Key']:
                 data_already_exists = True
                 break
@@ -72,8 +78,9 @@ try:
         message = f"Data for {data_date} is already in S3. Skipping API extraction."
         print(message)
         logger.info(message)
-        sys.exit(0) # Stops the script successfully here
-        
+        sys.exit(0) #exits if we have existing data, if we breaked instead of exit it would still try and get the data
+
+#if AWS credentials don't work or S3 is down, log the error but still try to get the data        
 except Exception as e:
     message = f"Failed to check S3: {e}. Proceeding with API extraction anyway."
     print(message)
