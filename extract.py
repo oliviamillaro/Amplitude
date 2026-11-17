@@ -52,7 +52,7 @@ AWS_ACCESS_KEY=os.getenv('AWS_ACCESS_KEY')
 AWS_SECRET_ACCESS_KEY=os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_BUCKET_NAME=os.getenv('AWS_BUCKET_NAME')
 
-#initialising s3 client using AWS credentials
+#setting up s3 client using AWS credentials
 logger.info("Checking S3 for existing data...")
 try:
     s3_client = boto3.client(
@@ -75,7 +75,7 @@ try:
                 break
                 
     if data_already_exists:
-        message = f"Data for {data_date} is already in S3. Skipping API extraction."
+        message = f"Data for {data_date} is already in S3. Skipping data extraction."
         print(message)
         logger.info(message)
         sys.exit(0) #exits if we have existing data, if we breaked instead of exit it would still try and get the data
