@@ -33,7 +33,7 @@ extraction_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 file_label = f"data_{data_date}_extracted_{extraction_time}"
 
 #setup log using function
-log_filename = f"{file_label}.log"
+log_filename = f"main_{file_label}.log"
 logger = setup_logging(log_filename)
 
 logger.info("Starting Amplitude ETL Pipeline...")
