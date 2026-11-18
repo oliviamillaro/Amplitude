@@ -150,8 +150,9 @@ while attempts <= max_attempts:
 
             # cleanup - removing temporary directory and leftover compressed files. leaves the raw zips, and the final JSONs
             shutil.rmtree(temp_dir) 
-            print("Temporary workspace cleaned up.")
-            logger.info("Temporary workspace cleaned up.")
+            os.remove(filename)
+            print("Temporary workspace and raw zip cleaned up.")
+            logger.info("Temporary workspace and raw zip cleaned up.")
 
             break
 
