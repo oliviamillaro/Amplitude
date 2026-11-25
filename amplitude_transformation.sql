@@ -367,8 +367,8 @@ SELECT 'session_aggregations', COUNT(*) FROM session_aggregations;
 
 -- Check 4: Session grain check (small gap reflects same-millisecond collisions)
 SELECT 
-    COUNT(*) AS total_rows,
-    COUNT(DISTINCT session_id) AS unique_sessions
+    COUNT(*) AS total_rows
+    ,COUNT(DISTINCT session_id) AS unique_sessions
 FROM session_aggregations;
 
 -- Check 5: Verify recent automated task runs
